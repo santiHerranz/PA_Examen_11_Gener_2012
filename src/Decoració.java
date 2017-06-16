@@ -14,6 +14,10 @@ public class Decoració {
     private int quantsMillor; //quants quadres té la millor solució
     private float espaiOcupatMillor; //paret ocupada ren la millor solució
 
+    public Quadre[] getQuadres() {
+        return totsQuadres;
+    }
+
     private class Parell {
         private int identificador;
         private boolean llargaria; //veure més endavant aclariment *
@@ -33,7 +37,7 @@ public class Decoració {
 
         @Override
         public String toString() {
-            return "C"+ identificador;
+            return "C"+ identificador + (llargaria?"_":"|");
         }
     }
 
@@ -42,21 +46,21 @@ public class Decoració {
         Aquesta informació queda emmagatzemada en el paràmetre quadres.
         El segon paràmetre indica el nombre de quadres d’on estriar*/
 
-        quadres[0] = new Quadre(1, "Miro", 5,3,4000, 500);
+        quadres[0] = new Quadre(1, "Miro", 20,5,40, 5);
         if (quantsQ==1) return;
-        quadres[1] = new Quadre(2, "", 3,4,1000, 20);
+        quadres[1] = new Quadre(2, "", 1,3,150, 20);
         if (quantsQ==2) return;
-        quadres[2] = new Quadre(3, "", 5,3,1000, 50);
+        quadres[2] = new Quadre(3, "", 5,2,500, 70);
         if (quantsQ==3) return;
-        quadres[3] = new Quadre(4, "", 5,3,1000, 50);
+        quadres[3] = new Quadre(4, "", 2,3,2000, 250);
         if (quantsQ==4) return;
-        quadres[4] = new Quadre(5, "", 5,3,1000, 50);
+        quadres[4] = new Quadre(5, "", 1,5,180, 15);
         if (quantsQ==5) return;
-        quadres[5] = new Quadre(6, "", 5,3,1000, 50);
+        quadres[5] = new Quadre(6, "", 2,2,1100, 4050);
         if (quantsQ==6) return;
-        quadres[6] = new Quadre(7, "", 5,3,1000, 50);
+        quadres[6] = new Quadre(7, "", 5,3,1000, 530);
         if (quantsQ==7) return;
-        quadres[7] = new Quadre(8, "", 5,3,1000, 50);
+        quadres[7] = new Quadre(8, "", 10,10,6000, 400);
         if (quantsQ==8) return;
 
     }
@@ -71,14 +75,6 @@ public class Decoració {
         totsQuadres=new Quadre[qQuadres];
         TotesDades(totsQuadres, qQuadres); //omplenem dades
 
-        //dupliquem els quadres
-/**/
-        Quadre aux[]=new Quadre[qQuadres*2];
-        for (int i=0; i<qQuadres; i++){
-            aux[i]=totsQuadres[i];
-            aux[qQuadres+i]= totsQuadres[i];
-        }
-        totsQuadres=aux;
         ///////////////////////////////////////////////////
         solucio = new Parell[qQuadres];
         millor  = new Parell[qQuadres];
@@ -100,7 +96,7 @@ public class Decoració {
         else {
             float total = 0.0f;
             for (int i=0; i<quantsMillor; i++){
-                r+= "Cuadre "+ millor[i].identificador;
+                r+= "Cuadre "+ millor[i].identificador +" "+ millor[i].getPreu() +" EUR";
                 total += millor[i].getPreu();
                 if (millor[i].llargaria)
                     r+= " en llargaria\n";
@@ -115,24 +111,36 @@ public class Decoració {
 
     public void backtracking( int k) {
         /*Exercici 5*/
+
+        if (k==0) {
+            //dupliquem els quadres
+            Quadre aux[]=new Quadre[qQuadres*2];
+            for (int i=0; i<qQuadres; i++){
+                aux[i]=totsQuadres[i];
+                aux[qQuadres+i]= totsQuadres[i];
+            }
+            totsQuadres=aux;
+        }
+
+
         // Esquema Millor
         int i=0;
         while (i < qQuadres*2){
 
             if (pucAfegir(i)){
 
-                boolean girat = (i > qQuadres);
+                Quadre quadre = totsQuadres[i];
+                boolean estaHoritzontal = (i > qQuadres);
+
+                quadre.setUsat(); //marcat
+                prestigiSolucio += quadre.getPrestigi();
+                if (estaHoritzontal)
+                    espaiOcupat +=quadre.getAmplada();
+                else
+                    espaiOcupat +=quadre.getAlçada();
 
                 //sempre és solució
-
-                totsQuadres[i].setUsat(); //marcat
-                prestigiSolucio +=totsQuadres[i].getPrestigi();
-                if (!girat)
-                    espaiOcupat +=totsQuadres[i].getLlargaria();
-                else
-                    espaiOcupat +=totsQuadres[i].getAlçada();
-
-                solucio[k] = new Parell(i,girat);
+                solucio[k] = new Parell(quadre.getIdentificador(), estaHoritzontal);
 
                 //Millor solució
                 if (esMillorSolucio(k)){
@@ -140,8 +148,8 @@ public class Decoració {
                     System.out.println(
                             " k="+ k
                                     +" "+ " i="+ i
-                                    +" "+ totsQuadres[i].toString()
-                                    +" Girat:"+ girat
+                                    +" "+ quadre.toString()
+                                    +" Vertical:"+ estaHoritzontal
                                     +" Ocupat:"+ espaiOcupat
                                     +" Prestigi:"+ prestigiSolucio
                                     +" "+ Arrays.toString(solucio));
@@ -162,8 +170,8 @@ public class Decoració {
                     backtracking(k+1);
 
                 //desfer
-                if (!girat)
-                    espaiOcupat -=totsQuadres[i].getLlargaria();
+                if (estaHoritzontal)
+                    espaiOcupat -=totsQuadres[i].getAmplada();
                 else
                     espaiOcupat -=totsQuadres[i].getAlçada();
 
@@ -180,9 +188,8 @@ public class Decoració {
     private boolean pucAfegir(int i) {
 
         return !totsQuadres[i].getUsat() &&
-                ( i < qQuadres && espaiOcupat + totsQuadres[i].getLlargaria()< paret
-                        ||
-                        i >= qQuadres&& espaiOcupat +totsQuadres[i-qQuadres].getAmplada()< paret);
+                ( i < qQuadres && espaiOcupat + totsQuadres[i].getAmplada()< paret
+                        || i >= qQuadres&& espaiOcupat +totsQuadres[i-qQuadres].getAmplada()< paret);
     }
 
     private boolean esCompletable(int k) {

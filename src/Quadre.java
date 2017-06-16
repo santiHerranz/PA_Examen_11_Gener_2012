@@ -24,18 +24,15 @@ public class Quadre {
     public int getIdentificador(){ return identificador;}
     public int getPrestigi(){ return prestigi;}
     public float getAlçada(){ return alçada;}
-    public float getLlargaria(){ return llargaria;}
+    public float getAmplada(){ return llargaria;}
     public float getPreu(){ return preu;}
     public String getPintor(){return pintor;}
 
-    public float getAmplada() {
-        return llargaria;
-    }
 
 
 
     public String toString() {
-        return "Cuadre "+ identificador +" ("+ llargaria +"x"+ alçada +")" ;
+        return "Cuadre "+ identificador +"\t("+ llargaria +"x"+ alçada +")\t"+ preu +" EUR\t"+ prestigi +"\n" ;
     }
 
 
